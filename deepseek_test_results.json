@@ -1,0 +1,24 @@
+{
+  "backend": "deepseek",
+  "test_file": "test_2pages.pdf",
+  "test_timestamp": "2025-10-21T17:15:35.291450",
+  "success": true,
+  "processing_time_seconds": 5.552790880203247,
+  "content_length_chars": 61,
+  "memory_before_mb": 407.796875,
+  "memory_after_mb": 740.078125,
+  "memory_delta_mb": 332.28125,
+  "content_preview": "Grades K-6\nMusic\nMusic\nGames s\nus\nGames\nActivities\nActivities",
+  "metadata": {
+    "extraction_method": "deepseek-ocr",
+    "ocr_engine": "deepseek",
+    "resolution_mode": "base",
+    "grounding_enabled": true,
+    "compression_enabled": true,
+    "page_count": 2,
+    "format": "pdf",
+    "regions": "[SemanticRegion(region_id='doc_1_0', region_type='text', region_sequence=0, page_number=1, content='Grades K-6\\nMusic\\nMusic\\nGames s\\nus\\nGames\\nActivities\\nActivities', raw_markdown='Grades K-6\\nMusic\\nMusic\\nGames s\\nus\\nGames\\nActivities\\nActivities', semantic_tags=[], markdown_level=None, bbox=None, table_html=None, table_rows=None, table_cols=None, image_description=None, image_type=None, equation_latex=None, equation_type=None, extraction_timestamp='2025-10-21T21:15:40.858705', model='deepseek-ocr', detected_language=None, chart_type=None, confidence_score=None, bounding_box=None), SemanticRegion(region_id='doc_2_0', region_type='text', region_sequence=0, page_number=2, content='', raw_markdown='', semantic_tags=[], markdown_level=None, bbox=None, table_html=None, table_rows=None, table_cols=None, image_description=None, image_type=None, equation_latex=None, equation_type=None, extraction_timestamp='2025-10-21T21:15:40.859691', model='deepseek-ocr-offline', detected_language=None, chart_type=None, confidence_score=None, bounding_box=None)]",
+    "region_count": 2,
+    "source": "test_2pages.pdf"
+  }
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "model": "8-bit",
+    "model_path": "./models/nanonets-ocr2-3b-mlx",
+    "iterations": 5,
+    "avg_time_sec": 33.11,
+    "min_time_sec": 32.34,
+    "max_time_sec": 33.95,
+    "model_memory_mb": 0.0,
+    "peak_memory_mb": 2517.4,
+    "output_length": 11413,
+    "timestamp": "2025-10-19T11:49:33.983212"
+  },
+  {
+    "model": "4-bit",
+    "model_path": "./models/nanonets-ocr2-3b-mlx-4bit",
+    "iterations": 5,
+    "avg_time_sec": 33.76,
+    "min_time_sec": 33.11,
+    "max_time_sec": 35.06,
+    "model_memory_mb": 0.0,
+    "peak_memory_mb": 2612.5,
+    "output_length": 11413,
+    "timestamp": "2025-10-19T11:52:56.728178"
+  }
+]

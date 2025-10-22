@@ -1,0 +1,17 @@
+[
+  {
+    "workers": 1,
+    "images_processed": 10,
+    "images_failed": 0,
+    "wall_time_sec": 355.82,
+    "wall_time_min": 5.93,
+    "avg_inference_sec": 35.58,
+    "total_inference_sec": 355.82,
+    "throughput_img_per_sec": 0.028,
+    "memory_start_mb": 329.4,
+    "memory_peak_mb": 2516.1,
+    "memory_delta_mb": 2186.8,
+    "model_memory_mb": 0.0,
+    "timestamp": "2025-10-19T11:11:24.921589"
+  }
+]
