@@ -1,0 +1,7 @@
+[dev]
+port = 5173
+
+[jsx]
+runtime = "automatic"
+importSource = "react"
+development = true

@@ -1,0 +1,117 @@
+{
+  "timestamp": "2025-10-21T21:16:41.985447",
+  "document": {
+    "path": "/Users/cnowlin/Downloads/_OceanofPDF.com_Classroom_Music_Games_and_Activities_-_Julie_Eisenhauer.pdf",
+    "size_mb": 20.627042770385742,
+    "exists": true
+  },
+  "pipeline_stages": {
+    "OCR_Ingestion": {
+      "status": "success",
+      "timestamp": "2025-10-21T21:16:56.409255",
+      "details": {
+        "loader_init_time_seconds": 0.023417949676513672,
+        "processing_time_seconds": 11.87123990058899,
+        "total_time_seconds": 11.894657850265503,
+        "content_length_chars": 132075,
+        "content_length_words": 21379,
+        "content_preview": "Grades K-6\nMusic\nMusic\nGames s\nus\nGames\nActivities\nActivities\n\nCompiled by: Julie Eisenhauer\nCover and book design: Jeff Richards\n\u00a9 2014 Lorenz Educational Press, a Lorenz company, and its licensors. All rights reserved.\nPermission to photocopy the student activities in this book is hereby granted to one teacher as part of \nthe purchase price. This permission may only be used to provide copies for this teacher\u2019s specific class-\nroom setting. This permission may not be transferred, sold, or given",
+        "metadata_keys": [
+          "extraction_method",
+          "ocr_engine",
+          "resolution_mode",
+          "grounding_enabled",
+          "compression_enabled",
+          "page_count",
+          "format",
+          "regions",
+          "region_count",
+          "source"
+        ]
+      }
+    },
+    "Document_Processing": {
+      "status": "success",
+      "timestamp": "2025-10-21T21:16:56.418270",
+      "details": {
+        "total_chunks": 166,
+        "processing_time_seconds": 0.00013065338134765625,
+        "avg_chunk_size": 795.6325301204819,
+        "first_chunk_preview": "Grades K-6\nMusic\nMusic\nGames s\nus\nGames\nActivities\nActivities\n\nCompiled by: Julie Eisenhauer\nCover and book design: Jeff Richards\n\u00a9 2014 Lorenz Educational Press, a Lorenz company, and its licensors. "
+      }
+    },
+    "Embeddings": {
+      "status": "success",
+      "timestamp": "2025-10-21T21:17:11.271875",
+      "details": {
+        "embeddings_generated": 10,
+        "embedding_dimensions": 512,
+        "embedding_time_seconds": 14.85223913192749,
+        "total_time_seconds": 14.852326154708862,
+        "device": "mps",
+        "avg_time_per_embedding": 1.485223913192749
+      }
+    },
+    "Vector_Storage": {
+      "status": "success",
+      "timestamp": "2025-10-21T21:17:11.671802",
+      "details": {
+        "collection_name": "classroom_music_activities",
+        "documents_stored": 10,
+        "embedding_dimension": 512,
+        "storage_time_seconds": 0.061112165451049805,
+        "vector_db_path": "/var/folders/_1/66qwm39s5vg8tgtylwl5hvkh0000gn/T/rag_e2e_zomkg5vn"
+      }
+    },
+    "RAG_Retrieval": {
+      "status": "success",
+      "timestamp": "2025-10-21T21:17:12.727410",
+      "details": {
+        "queries_executed": 5,
+        "retrieval_time_seconds": 1.055429220199585,
+        "avg_time_per_query": 0.21108584403991698,
+        "successful_queries": 5,
+        "sample_queries": [
+          "classroom music games activities",
+          "teaching music to children"
+        ]
+      }
+    },
+    "Lesson_Plan_Generation": {
+      "status": "success",
+      "timestamp": "2025-10-21T21:17:12.728064",
+      "details": {
+        "generation_time_seconds": 0.0005078315734863281,
+        "lesson_plan_sections": 5,
+        "content_analyzed": 132075,
+        "lesson_plan_summary": {
+          "title": "Classroom Music Games and Activities Lesson Plan",
+          "source_document": "_OceanofPDF.com_Classroom_Music_Games_and_Activities_-_Julie_Eisenhauer.pdf",
+          "content_summary": {
+            "total_characters": 132075,
+            "total_lines": 4958,
+            "key_sections_identified": 1937
+          },
+          "recommendations": [
+            "Use DeepseekOCR GUNDAM mode for music education content extraction",
+            "Games and activities identified in source material",
+            "Content suitable for interactive classroom learning",
+            "Multiple activity examples available for different grade levels"
+          ],
+          "metadata": {
+            "ocr_model": "deepseek_gundam",
+            "processing_pipeline": "complete",
+            "embedding_model": "jina_v4"
+          }
+        }
+      }
+    }
+  },
+  "pipeline_summary": {
+    "total_time_seconds": 30.742615699768066,
+    "stages_completed": 6,
+    "stages_failed": 0,
+    "total_stages": 6,
+    "status": "success"
+  }
+}

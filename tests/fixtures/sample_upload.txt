@@ -1,0 +1,3 @@
+This is a sample document for E2E upload test.
+It contains a couple of lines to simulate content.
+Uploaded via Playwright automation.
