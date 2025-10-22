@@ -1,0 +1,123 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Model cache
+.cache/
+.paddlex_cache/
+*.ckpt
+*.pth
+
+# Vector database
+.chroma_db/
+chroma_db/
+chroma_storage/
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Runtime data and uploads
+uploads/*/
+!uploads/.gitkeep
+
+# Playwright screenshots
+.playwright-mcp/
+
+# Frontend build artifacts
+frontend/dist/
+
+# Test files and test data
+test_*.py
+test_*.html
+test_*.txt
+test_db/
+!tests/**/*.py
+
+# Utility and debug scripts
+check_*.py
+debug_*.py
+cleanup_*.py
+delete_*.py
+create_*.py
+demo_*.py
+verify_*.py
+simple_*.py
+run_*.py
+
+# Screenshots and test images (root only)
+/*.png
+
+# Tool configurations
+.opencode/
+opencode_config.json
+
+# Benchmarks
+benchmarks/
+
+# Large model files
+models/
+*.safetensors
+*.bin
+*.gguf

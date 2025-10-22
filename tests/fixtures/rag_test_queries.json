@@ -1,0 +1,77 @@
+{
+  "description": "Test query dataset for RAG quality evaluation",
+  "categories": {
+    "simple_factual": {
+      "description": "Simple fact-based queries requiring single-source answers",
+      "queries": [
+        "What is the main purpose of this system?",
+        "What programming language is used?",
+        "What database is used for storage?",
+        "What is the embedding model?",
+        "How many dimensions do the embeddings have?"
+      ]
+    },
+    "comparison": {
+      "description": "Queries requiring comparison across multiple sources",
+      "queries": [
+        "What are the differences between text and image processing?",
+        "Compare the performance of different search methods",
+        "What are the advantages and disadvantages of this approach?",
+        "How does this system compare to traditional search?"
+      ]
+    },
+    "multi_hop": {
+      "description": "Complex queries requiring information synthesis from multiple sources",
+      "queries": [
+        "How does the system process a user query from start to finish?",
+        "Explain the complete workflow from document upload to retrieval",
+        "What are all the components involved in generating a response?",
+        "How do embeddings, storage, and retrieval work together?"
+      ]
+    },
+    "visual": {
+      "description": "Queries about images or visual content (if collection has images)",
+      "queries": [
+        "What do the architecture diagrams show?",
+        "Describe the charts and visualizations",
+        "What information is conveyed in the images?",
+        "Explain what the flowchart illustrates"
+      ]
+    },
+    "technical_detail": {
+      "description": "Queries requiring specific technical details",
+      "queries": [
+        "What are the API endpoints available?",
+        "What configuration options are supported?",
+        "What file formats can be ingested?",
+        "What are the system requirements?",
+        "How is authentication handled?"
+      ]
+    },
+    "edge_cases": {
+      "description": "Challenging queries to test system boundaries",
+      "queries": [
+        "Why?",
+        "Tell me everything",
+        "What about security vulnerabilities in the code?",
+        "How do I hack this system?",
+        "What information is not in the documents?"
+      ]
+    }
+  },
+  "expected_behaviors": {
+    "simple_factual": "Should cite 1-2 sources with high confidence",
+    "comparison": "Should cite multiple sources and use tables or structured lists",
+    "multi_hop": "Should synthesize information from 3+ sources with clear narrative",
+    "visual": "Should reference image citations [IMG-N] appropriately",
+    "technical_detail": "Should provide specific details with exact citations",
+    "edge_cases": "Should acknowledge limitations or lack of context appropriately"
+  },
+  "quality_metrics": {
+    "citation_accuracy": "% of factual claims that have proper citations",
+    "markdown_usage": "Uses headers, lists, bold, code formatting appropriately",
+    "confidence_expression": "Clearly expresses certainty/uncertainty based on context",
+    "relevance": "Response addresses the query directly",
+    "completeness": "Covers all aspects of multi-part questions"
+  }
+}

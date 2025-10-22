@@ -1,0 +1,292 @@
+INGESTION ARCHITECTURE ANALYSIS
+================================
+
+CURRENT LOADER ECOSYSTEM
+========================
+
+        LoaderFactory
+        =============
+            |
+            +-- TextLoader (.txt)
+            |
+            +-- MarkdownLoader (.md)
+            |
+            +-- PDFLoader (.pdf) [uses pypdf]
+            |
+            +-- DocxLoader (.docx, .doc) [uses python-docx]
+            |
+            +-- ImageLoader (.png, .jpg, .jpeg, .webp, .gif, .bmp) [uses PIL]
+            |
+            X-- PowerPointLoader (.pptx, .ppt) [MISSING - needs python-pptx]
+            |
+            X-- JSONLoader (.json) [MISSING - claimed but not implemented]
+            |
+            X-- CSVLoader (.csv) [MISSING - claimed but not implemented]
+
+
+API VALIDATION LAYERS
+=====================
+
+Layer 1: SUPPORTED_FORMATS (app.py:42)
+┌─────────────────────────────────────────────────────────────────┐
+│ ".txt", ".pdf", ".md", ".json", ".csv",                         │
+│ ".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"                │
+│                                                                 │
+│ MISSING: ".pptx", ".ppt"                                        │
+└─────────────────────────────────────────────────────────────────┘
+         ↓ ✓ Format in list?
+         ↓
+Layer 2: Upload Handler (app.py:291-344)
+┌─────────────────────────────────────────────────────────────────┐
+│ for file in files:                                              │
+│   file_ext = Path(file.filename).suffix.lower()                 │
+│   if file_ext not in SUPPORTED_FORMATS:                         │
+│     → REJECT ✗                                                  │
+│   else:                                                          │
+│     → ACCEPT ✓                                                  │
+└─────────────────────────────────────────────────────────────────┘
+         ↓ ✓ File accepted
+         ↓
+Layer 3: Task Processing (tasks.py:92-254)
+┌─────────────────────────────────────────────────────────────────┐
+│ file_ext = file_path.suffix.lower()                             │
+│ is_image = file_ext in IMAGE_FORMATS                            │
+│                                                                 │
+│ if is_image:                                                    │
+│   → Vision encoder path (ImageLoader)                           │
+│ else:                                                            │
+│   → Text processing path (DocumentProcessor)                    │
+└─────────────────────────────────────────────────────────────────┘
+         ↓ PowerPoint would go here (text path)
+         ↓
+Layer 4: LoaderFactory (loaders.py:206-239)
+┌─────────────────────────────────────────────────────────────────┐
+│ for loader in self._loaders:                                    │
+│   if loader.supports(file_path):  ← PowerPointLoader.supports() │
+│     return loader                                               │
+│ return None  ← NO LOADER FOR .PPTX → FAILS ✗                   │
+└─────────────────────────────────────────────────────────────────┘
+
+
+END-TO-END FLOW (Current: PowerPoint Upload FAILS)
+====================================================
+
+1. User uploads presentation.pptx
+   ↓
+2. API validation:
+   file_ext = ".pptx"
+   if ".pptx" in SUPPORTED_FORMATS:  ✗ FALSE
+   → REJECTED with "Unsupported file format: .pptx"
+   
+   STOP HERE - Never reaches loader
+
+
+END-TO-END FLOW (With PowerPoint Support)
+===========================================
+
+1. User uploads presentation.pptx
+   ↓
+2. API validation:
+   file_ext = ".pptx"
+   if ".pptx" in SUPPORTED_FORMATS:  ✓ TRUE
+   → ACCEPTED
+   ↓
+3. Task processing:
+   is_image = file_ext in IMAGE_FORMATS  ✗ FALSE
+   → Text processing path (not vision)
+   ↓
+4. DocumentProcessor.load_document():
+   call loader_factory.load(presentation.pptx)
+   ↓
+5. LoaderFactory.get_loader():
+   for loader in [Text, Markdown, Image, PDF, Docx, PowerPoint]:
+       if loader.supports(".pptx"):  ✓ PowerPointLoader.supports() = True
+       → return PowerPointLoader instance
+   ↓
+6. PowerPointLoader.load(presentation.pptx):
+   - Open presentation with python-pptx
+   - Extract text from all slides
+   - Track slide boundaries
+   - Extract metadata
+   - Return Document object
+   ↓
+7. Document object created:
+   {
+     "content": "Slide 1 Title\nSlide 1 Text\n\nSlide 2 Title\n...",
+     "metadata": {
+       "format": "pptx",
+       "slide_count": 10,
+       "author": "John Doe",
+       "title": "Q4 Report",
+       "slide_boundaries": [
+         {"slide_number": 1, "start_index": 0, "end_index": 234},
+         {"slide_number": 2, "start_index": 236, "end_index": 512},
+         ...
+       ]
+     },
+     "source": "/path/to/presentation.pptx"
+   }
+   ↓
+8. DocumentProcessor.chunk_document():
+   chunks = chunking_strategy.chunk(document)
+   (FixedSizeChunker, SentenceChunker, or SlidingWindowChunker)
+   ↓
+9. For each chunk, generate embedding:
+   embedder.encode_text(chunk.content, task="retrieval")
+   ↓
+10. Store in vector database:
+    vector_store.add_embeddings(
+      collection_name=collection,
+      embeddings=[...],
+      documents=[chunk_content, ...],
+      metadatas=[chunk_metadata, ...]
+    )
+    ↓
+11. SUCCESS ✓
+    PowerPoint fully indexed and searchable
+
+
+COMPONENT INTERACTION MAP
+==========================
+
+                    ┌─ LOADER ABSTRACTION ──┐
+                    │                       │
+                    │  DocumentLoader (ABC) │
+                    │                       │
+                    │  load()              │
+                    │  supports()          │
+                    └───────┬───────────────┘
+                            △
+                    ┌───────┴────────────────────┬─────────────────────┐
+                    │                           │                     │
+            ┌──────────────┐          ┌──────────────┐      ┌──────────────────┐
+            │ TextLoader   │          │ PDFLoader    │      │ PowerPointLoader │
+            └──────────────┘          └──────────────┘      └──────────────────┘
+                   │                         │                      │
+                   └──────────┬──────────────┴──────────────────────┘
+                              │
+                         [Document]
+                          {content, metadata}
+                              │
+                         ┌────┴─────┐
+                         │           │
+                  ┌──────────────┐  ┌──────────────────────────┐
+                  │   Chunking   │  │   NO DEPENDENCY ON       │
+                  │   (Format-   │  │   SOURCE FORMAT          │
+                  │    agnostic) │  │                          │
+                  └──────┬───────┘  │   - Embeddings (format-  │
+                         │          │     agnostic)            │
+                    [Chunks]         │                          │
+                         │          │   - Storage (format-     │
+                  ┌──────┴────┐     │     agnostic)            │
+                  │           │     │                          │
+           ┌────────────────┐ │     │   - Search (format-      │
+           │  Embeddings    │ │     │     agnostic)            │
+           │ (Format-       │ │     │                          │
+           │  agnostic)     │ │     │   - RAG (format-         │
+           └────────┬───────┘ │     │     agnostic)            │
+                    │         │     └──────────────────────────┘
+           ┌────────┴─────────┴──┐
+           │                     │
+        [Embeddings]         [Metadata]
+           │                     │
+      ┌────┴──────────────────────┴────────┐
+      │   ChromaVectorStore.add_embeddings │
+      │   (Format-agnostic)                │
+      └────────────────────────────────────┘
+                     │
+              [Vector Database]
+
+
+THE THREE BARRIERS TO POWERPOINT
+=================================
+
+BARRIER 1: Dependency Declaration
+  File: pyproject.toml
+  Current: python-pptx NOT in dependencies list
+  Fix: Add 1 line
+  Impact: Without this, "python-pptx" import fails
+
+BARRIER 2: API Whitelist
+  File: app.py line 42
+  Current: ".pptx" NOT in SUPPORTED_FORMATS
+  Fix: Add ".pptx", ".ppt" to list
+  Impact: File rejected at validation layer before reaching loaders
+
+BARRIER 3: Loader Implementation
+  File: loaders.py
+  Current: PowerPointLoader class doesn't exist
+  Fix: Create ~50-line class + 5-line factory registration
+  Impact: LoaderFactory can't load .pptx files
+
+
+ARCHITECTURAL STRENGTH: Format-Agnosticism
+==========================================
+
+Why adding any new format is simple:
+
+Pipeline Layer          Format-Aware?   Why
+─────────────────────────────────────────────────────────────────
+File Upload             YES             File validation (necessary)
+Loader Factory          YES             File extension dispatch
+LoaderFactory.load()    YES             Creates appropriate loader
+DocumentLoader subclass YES             Specific format handling
+Document creation       NO              Abstract "content + metadata"
+Chunking                NO              Just text processing
+Embeddings              NO              Just numerical vectors
+Vector Storage          NO              Generic embedding storage
+Search                  NO              Generic vector similarity
+RAG Generation          NO              Generic text + embedding use
+
+
+SECONDARY DISCOVERY: JSON/CSV Inconsistency
+============================================
+
+Current State:
+  SUPPORTED_FORMATS claims: ".json" ✓, ".csv" ✓
+  Available loaders: JSONLoader ✗, CSVLoader ✗
+
+If you upload "data.json":
+  ┌─────────────────────────────────────┐
+  │ Step 1: API validation              │
+  │ ".json" in SUPPORTED_FORMATS? YES   │
+  │ Status: PASS ✓                      │
+  ├─────────────────────────────────────┤
+  │ Step 2: LoaderFactory lookup        │
+  │ for loader in [Text, Markdown, ...] │
+  │   loader.supports("data.json")?     │
+  │   ALL return False                  │
+  │ Status: FAIL ✗ "No loader found"    │
+  └─────────────────────────────────────┘
+
+This reveals: API specification and loader implementation are misaligned.
+Likely cause: Future features declared in API but not yet implemented.
+
+
+IMPLEMENTATION ROADMAP
+======================
+
+PHASE 1: Configuration (5 minutes)
+  ✓ Add python-pptx>=0.6.21 to pyproject.toml
+  ✓ Add ".pptx", ".ppt" to SUPPORTED_FORMATS
+
+PHASE 2: Loader Implementation (45 minutes)
+  ✓ Create PowerPointLoader class
+  ✓ Implement load() method
+  ✓ Implement supports() method
+  ✓ Extract slide boundaries for tracking
+  ✓ Extract presentation metadata
+
+PHASE 3: Factory Integration (5 minutes)
+  ✓ Add PowerPointLoader to _register_default_loaders()
+  ✓ Add graceful import error handling
+
+PHASE 4: Export/Visibility (2 minutes)
+  ✓ Add PowerPointLoader to __init__.py exports
+
+PHASE 5: Testing (30 minutes)
+  ✓ Create unit tests for loader
+  ✓ Create integration tests
+  ✓ Test error handling
+
+TOTAL: ~90 minutes for production-ready implementation

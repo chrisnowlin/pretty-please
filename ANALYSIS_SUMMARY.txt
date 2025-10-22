@@ -1,0 +1,237 @@
+COMPREHENSIVE CODEBASE ANALYSIS - SUMMARY
+==========================================
+
+Project: Pretty Please - RAG Pipeline (Educational AI)
+Version: 2.0.0
+Analysis Date: October 21, 2025
+Status: Production-Ready with DeepseekOCR
+
+ANALYSIS DELIVERABLES
+====================
+
+1. CODEBASE_STRUCTURE_ANALYSIS.md (765 lines, 27 KB)
+   - Comprehensive project overview and architecture
+   - Frontend/backend separation patterns
+   - Complete directory structure with purposes
+   - RAG pipeline end-to-end flow diagrams
+   - API endpoints reference (50+ endpoints)
+   - Configuration file documentation
+   - Recent changes and enhancements
+   - Data flow diagrams for key operations
+   - Key connection points between frontend and backend
+
+2. QUICK_REFERENCE.md (550 lines, 14 KB)
+   - Quick start guide (make start, service management)
+   - API quick reference with curl examples
+   - Frontend component map and routing
+   - Backend module API reference with code examples
+   - Database schema documentation
+   - Environment variables guide
+   - Common tasks (bulk uploads, lesson generation, etc.)
+   - Troubleshooting section
+   - File locations and log management
+
+KEY FINDINGS
+============
+
+ARCHITECTURE OVERVIEW
+- Backend: FastAPI (Python) - Port 8000
+- Frontend: React/TypeScript with Vite - Port 5173
+- Vector Database: ChromaDB (persistent, local-first)
+- Embeddings: Jina v4 (2048-dim, Apple Silicon optimized)
+- OCR Engine: DeepseekOCR with GUNDAM mode (dynamic resolution)
+- LLM: Qwen generator for lesson planning
+- Database: SQLAlchemy with SQLite
+
+FRONTEND/BACKEND SEPARATION
+- Clean separation with relative API URLs (/api)
+- WebSocket for real-time progress (/ws/progress/{task_id})
+- Frontend dist mounted at / for production serving
+- CORS enabled for development flexibility
+- Vite dev server proxies API calls in development
+
+KEY MODULES
+Backend:
+  - api/: FastAPI application + models + task management (1636 lines + 55k)
+  - embeddings/: Jina v4 implementation with config presets
+  - ingestion/: Document processing, OCR, chunking, semantic regions
+  - storage/: ChromaDB vector store abstraction
+  - retrieval/: Educational retriever, reranker
+  - generation/: Qwen LLM, lesson planner, PDF exporter
+  - database/: SQLAlchemy ORM, lesson persistence
+  - monitoring/: Metrics collection
+  - workers/: Optional RQ distributed processing
+
+Frontend:
+  - pages/: 6 main page components (Search, Ingest, Collections, Chat, Lessons, Settings)
+  - components/: Reusable UI components organized by feature
+  - services/: APIClient class with full API wrapper
+  - contexts/: Theme management
+  - hooks/: Custom React hooks
+  - styles/: Theme configuration
+
+RAG PIPELINE FLOW
+1. Document Upload (Frontend)
+   ├─ POST /api/ingest/upload
+   └─ WebSocket /ws/progress/{task_id}
+
+2. OCR Ingestion (DeepseekOCR + GUNDAM)
+   ├─ Dynamic resolution (640×640 or 1024×1024)
+   ├─ Grounding (bounding boxes)
+   ├─ Compression (optical)
+   └─ Attention: SDPA on MPS
+
+3. Document Processing
+   ├─ Markdown parsing
+   ├─ Metadata extraction
+   ├─ Thumbnail generation
+   └─ Image extraction
+
+4. Semantic Chunking
+   ├─ Split by boundaries (1000 chars)
+   ├─ Overlap for context (200 chars)
+   └─ Filter empty chunks
+
+5. Embedding Generation
+   ├─ Batch processing (32 tokens)
+   ├─ 2048-dimensional vectors
+   └─ Task-specific optimization (retrieval.passage)
+
+6. Vector Storage
+   ├─ ChromaDB collection creation
+   ├─ Metadata attachment
+   └─ Persistent disk storage (.chroma_db/)
+
+7. Artifact Organization
+   ├─ Original documents
+   ├─ Extracted images
+   └─ Thumbnails
+
+FRONTEND-BACKEND INTEGRATION POINTS
+1. Upload Orchestration
+   - IngestionPage → UploadZone → ProgressTracker
+   - Real-time sync via WebSocket
+
+2. Configuration Management
+   - SettingsPage → Runtime config persistence
+   - Immediate effect for next operation
+
+3. Search Results
+   - SearchPage displays SearchResult components
+   - Image URLs: /api/images/thumbnail/{collection}/{id}
+
+4. Lesson Generation
+   - LessonPlansPage → RAG pipeline → DB persistence
+   - Caching: state.lesson_cache
+
+5. Collection Management
+   - CollectionsPage → CollectionManager → Directory structure
+   - Per-collection settings
+
+RECENT IMPROVEMENTS (Last 5 Commits)
+1. End-to-end RAG pipeline test validation (30.74s execution)
+2. PaddleOCR removal - unified on DeepseekOCR
+3. GUNDAM mode implementation (dynamic multi-resolution)
+4. Attention mechanism fixes (SDPA on MPS)
+5. Comprehensive test results and documentation
+
+CONFIGURATION SYSTEM
+Runtime Configs (./data/):
+- embedding_config.json: Task, dimensions, late_chunking, format
+- ocr_config.json: Resolution mode, grounding, compression, batch size
+- collection_configs/: Per-collection settings
+
+Configuration Presets:
+Embeddings:
+  - for_query: Fast single-shot (1024-dim)
+  - for_documents: Context preservation (1024-dim with late chunking)
+  - fast: 4× faster (512-dim)
+  - storage_optimized: Binary format (8× smaller)
+
+OCR:
+  - deepseek_tiny: Fastest (512×512)
+  - deepseek_small: Balanced (640×640)
+  - deepseek_balanced: Default (1024×1024)
+  - deepseek_high_quality: High fidelity (1280×1280)
+  - deepseek_gundam: Dynamic multi-resolution
+  - deepseek_production: vLLM acceleration (GPU)
+
+API ENDPOINTS (50+ endpoints)
+Collection Management: 3 endpoints
+Document Ingestion: 3 endpoints
+Search & Retrieval: 4 endpoints
+RAG Chat: 3 endpoints
+Lesson Plans: 7 endpoints
+Configuration: 10 endpoints
+Monitoring: 7 endpoints
+Admin/System: 5+ endpoints
+
+RECENT COMMITS IMPACT
+- Commit 0c840cafc: Full pipeline validation with GUNDAM mode
+- Commit 18763b3c4: Unified OCR strategy (DeepseekOCR only)
+- Commit c8e7bd4ce: Performance comparison documentation
+- Commit d7c2ae0ac: Attention mechanism fixes
+
+All stages tested and validated:
+  Stage 1 (OCR): 9.3s on 96-page PDF
+  Stage 2 (Chunking): <1ms for 166 chunks
+  Stage 3 (Embeddings): 14.85s for 10 chunks
+  Stage 4 (Storage): 0.061s persistence
+  Stage 5 (Retrieval): 1.055s for 5 queries
+  Stage 6 (Generation): <1ms analysis
+  Total: 30.74 seconds end-to-end
+
+FILE LOCATIONS
+Vector DB: .chroma_db/
+Config: data/
+Documents: uploads/{collection}/documents/
+Images: uploads/{collection}/images/
+Thumbnails: uploads/{collection}/thumbnails/
+Task DB: tasks.db
+Lesson DB: lesson_plans.db
+Frontend dist: frontend/dist/
+Logs: /tmp/pretty_please_*.log
+
+STRENGTHS OF CURRENT ARCHITECTURE
+1. Clean frontend/backend separation
+2. Real-time progress tracking via WebSocket
+3. Configuration persistence and runtime updates
+4. Optional distributed processing (RQ)
+5. Comprehensive metrics and monitoring
+6. Multi-modal search (text and images)
+7. Educational focus (lesson generation)
+8. Local-first design (no external services)
+9. Production-ready error handling
+10. Flexible OCR strategy with GUNDAM mode
+
+MAIN CONNECTION PATTERNS
+1. RESTful API for CRUD operations
+2. WebSocket for real-time updates
+3. Async task management for long operations
+4. Configuration persistence across restarts
+5. Content delivery for media files
+6. Database persistence for lessons and sessions
+
+TESTING & VALIDATION
+- Unit tests in tests/unit/
+- Integration tests in tests/integration/
+- E2E tests in tests/e2e/
+- Test fixtures in tests/fixtures/
+- All stages validated in end-to-end tests
+- Performance benchmarks available
+
+DOCUMENTATION STRUCTURE
+- CODEBASE_STRUCTURE_ANALYSIS.md: Deep technical overview
+- QUICK_REFERENCE.md: Practical usage guide
+- API documentation: http://localhost:8000/docs (auto-generated)
+- Configuration guides: docs/guides/
+- Architecture docs: docs/architecture/
+
+NEXT STEPS FOR DEVELOPERS
+1. Review CODEBASE_STRUCTURE_ANALYSIS.md for architecture
+2. Use QUICK_REFERENCE.md for common tasks
+3. Check API docs at /docs endpoint
+4. Run make start to see system in action
+5. Review recent commits for latest changes
+6. Check test files for usage examples
+
